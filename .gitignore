@@ -12,9 +12,15 @@ dist/
 
 # Compiled Python bytecode
 *.py[cod]
+__pycache__/
+*.pyc
+
 
 # Log files
 *.log
+logs/
+temp/
+
 
 # Package files
 *.jar
@@ -47,4 +53,9 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
+# Virtual environments
+venv/
+.venv/
+venv_editor_de_imagens/
 
