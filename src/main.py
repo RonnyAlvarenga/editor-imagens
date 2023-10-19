@@ -3,9 +3,9 @@ import tkinter as tk
 from tkinter import Label, PhotoImage, Scale, filedialog, font, messagebox
 
 import numpy as np
-from PIL import  Image, ImageFilter, ImageTk
+from PIL import Image, ImageFilter, ImageTk
 
-# Variáveis globais    
+# Variáveis globais
 current_image = None
 original_image = None
 edited_image = None
@@ -18,22 +18,28 @@ max_width, max_height = 600, 300
 # Função para abrir uma imagem
 def open_image():
     global current_image, original_image, edited_image
-    file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png *.jpeg *.bmp")])
+    file_path = filedialog.askopenfilename(
+        filetypes=[("Image files", "*.jpg *.png *.jpeg *.bmp")])
     if file_path:
         original_image = Image.open(file_path)
 
-        img_array = np.array(original_image)
-        img_height, img_width, _ = img_array.shape
-
-        if img_width > max_width or img_height > max_height:
-            scale = min(max_width / img_width, max_height / img_height)
-            new_width = int(img_width * scale)
-            new_height = int(img_height * scale)
-            img_array = np.array(original_image.resize((new_width, new_height)))
-
-            edited_image = Image.fromarray(img_array)
+        # Verificar se a imagem é em tons de cinza (preto e branco)
+        if original_image.mode == 'L':
+            edited_image = original_image.convert('L')
         else:
-            edited_image = original_image.copy()
+            img_array = np.array(original_image)
+            img_height, img_width, _ = img_array.shape
+
+            if img_width > max_width or img_height > max_height:
+                scale = min(max_width / img_width, max_height / img_height)
+                new_width = int(img_width * scale)
+                new_height = int(img_height * scale)
+                img_array = np.array(
+                    original_image.resize((new_width, new_height)))
+
+                edited_image = Image.fromarray(img_array)
+            else:
+                edited_image = original_image.copy()
 
         current_image = ImageTk.PhotoImage(edited_image)
         label.config(image=current_image)
@@ -43,11 +49,13 @@ def open_image():
 def rotate_image():
     global current_image, edited_image, rotation_angle
     if current_image:
-        
-        max_width, max_height = 600, 300  
-        
+        max_width, max_height = 600, 300
         img_array = np.array(edited_image)
-        img_height, img_width, _ = img_array.shape
+
+        if len(img_array.shape) == 2:  # Verifica se a imagem é em tons de cinza
+            img_height, img_width = img_array.shape
+        else:
+            img_height, img_width, _ = img_array.shape
 
         if img_width > max_width or img_height > max_height:
             scale = min(max_width / img_width, max_height / img_height)
@@ -55,11 +63,9 @@ def rotate_image():
             new_height = int(img_height * scale)
             img_array = np.array(edited_image.resize((new_width, new_height)))
 
-            edited_image = Image.fromarray(img_array)
-
         rotation_angle += 90
         if rotation_angle > 360:
-            rotation_angle = 0 
+            rotation_angle = 0
 
         if rotation_angle == 90:
             edited_image = edited_image.transpose(Image.ROTATE_90)
@@ -68,13 +74,12 @@ def rotate_image():
         elif rotation_angle == 270:
             edited_image = edited_image.transpose(Image.ROTATE_270)
         else:
-            edited_image = edited_image.transpose(Image.FLIP_TOP_BOTTOM) 
+            edited_image = edited_image.transpose(Image.FLIP_TOP_BOTTOM)
 
         current_image = ImageTk.PhotoImage(edited_image)
         label.config(image=current_image)
         label.image = current_image
         update_rotation_label()
-
 
 # Função para salvar a imagem
 def save_image():
@@ -87,7 +92,7 @@ def save_image():
         )
         if file_path:
             try:
-                
+
                 edited_image.save(file_path)
                 messagebox.showinfo("Sucesso", "Imagem salva com sucesso!")
             except Exception as e:
@@ -105,19 +110,18 @@ def apply_blur_effect(blur_radius):
         label.config(image=current_image)
         label.image = current_image
 
-        
+
 def blur_effect():
     blur_radius = 2
-    apply_blur_effect(blur_radius)        
+    apply_blur_effect(blur_radius)
 
 
-        
 def apply_gaussian_effect():
     global current_image, edited_image, original_image
     if current_image:
         try:
             blur_radius = gaussian_radius_slider.get()
-            original_image = edited_image.copy() 
+            original_image = edited_image.copy()
             blurred_image = edited_image.filter(
                 ImageFilter.GaussianBlur(radius=blur_radius))
             edited_image = blurred_image.copy()
@@ -127,6 +131,8 @@ def apply_gaussian_effect():
         except ValueError:
             messagebox.showerror(
                 "Erro", "Insira um valor válido para o raio do efeito gaussiano.")
+
+
 def toggle_gaussian_controls():
     global current_image, gaussian_controls_visible
 
@@ -134,13 +140,13 @@ def toggle_gaussian_controls():
         if gaussian_controls_visible:
             gaussian_radius_slider.pack_forget()
             apply_gaussian_button.pack_forget()
-            # cancel_gaussian_button.pack_forget() 
+            # cancel_gaussian_button.pack_forget()
             gaussian_controls_visible = False
         else:
             gaussian_radius_slider.pack(side="left", padx=5, pady=5)
             apply_gaussian_button.pack(side="left", padx=5, pady=5)
-            # cancel_gaussian_button.pack(side="left", padx=5, pady=5)  
-            gaussian_controls_visible = True            
+            # cancel_gaussian_button.pack(side="left", padx=5, pady=5)
+            gaussian_controls_visible = True
 
 # Função para redimensionar a imagem
 def resize_image():
@@ -175,7 +181,7 @@ def resize_image():
                 new_height = int(height_entry.get())
                 global resized_image
                 resized_image = edited_image.resize(
-                    (new_width, new_height), Image.ANTIALIAS)
+                    (new_width, new_height), Image.LANCZOS)
                 current_image = ImageTk.PhotoImage(resized_image)
                 label.config(image=current_image)
                 label.image = current_image
@@ -205,11 +211,11 @@ def resize_image():
 
 
 # Função para converter a imagem para preto e branco
-def image_color():
+def image_color_to_pb():
     global current_image, edited_image
     if current_image:
         try:
-            edited_image = edited_image.convert('L') 
+            edited_image = edited_image.convert('L')
             current_image = ImageTk.PhotoImage(edited_image)
             label.config(image=current_image)
             label.image = current_image
@@ -232,8 +238,10 @@ def remove_image():
     original_image = None
     edited_image = None
 
+
 # Funções efeito gaussiano
 gaussian_controls_visible = False
+
 
 def toggle_gaussian_controls():
     global current_image, gaussian_controls_visible
@@ -252,25 +260,30 @@ def toggle_gaussian_controls():
 def cancel_effect():
     global current_image, edited_image, original_image
     if original_image:
-        img_array = np.array(original_image)
-        img_height, img_width, _ = img_array.shape
+        if len(np.array(original_image).shape) == 2:
+            img_array = np.array(original_image)
+        else:
+            img_array = np.array(original_image)
+            img_height, img_width, _ = img_array.shape
 
-        if img_width > max_width or img_height > max_height:
-            scale = min(max_width / img_width, max_height / img_height)
-            new_width = int(img_width * scale)
-            new_height = int(img_height * scale)
-            img_array = np.array(original_image.resize((new_width, new_height)))
+            if img_width > max_width or img_height > max_height:
+                scale = min(max_width / img_width, max_height / img_height)
+                new_width = int(img_width * scale)
+                new_height = int(img_height * scale)
+                img_array = np.array(
+                    original_image.resize((new_width, new_height)))
 
         edited_image = Image.fromarray(img_array)
         current_image = ImageTk.PhotoImage(edited_image)
         label.config(image=current_image)
-        label.image = current_image            
+        label.image = current_image
 
 
 # Encerrar o programa
 def close():
     main_window.quit()
     sys.exit()
+
 
 # Interface gráfica
 main_window = tk.Tk()
@@ -307,7 +320,7 @@ menu_buttons = [
     ("Desfocar\nImagem", blur_effect),
     ("Aplicar\nGaussiano", toggle_gaussian_controls),
     ("Tamanho\nImagem", resize_image),
-    ("Imagem\nP&B", image_color),
+    ("Imagem\nP&B", image_color_to_pb),
     ("Cancelar\nAlterações", cancel_effect),
     ("Salvar\nImagem", save_image),
     ("Sair", close)
@@ -356,6 +369,6 @@ gaussian_radius_slider.pack_forget()
 
 apply_gaussian_button = tk.Button(
     gaussian_frame, text="Aplicar", command=apply_gaussian_effect, font=font_menu, bg=main_window_color)
-apply_gaussian_button.pack_forget() 
+apply_gaussian_button.pack_forget()
 
 main_window.mainloop()
