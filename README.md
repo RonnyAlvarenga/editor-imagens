@@ -52,3 +52,6 @@ Sinta-se à vontade para contribuir com melhorias ou correções neste projeto. 
 
 ## Licença
 Este projeto está licenciado sob a Licença MIT. Consulte o arquivo LICENSE para obter detalhes.
+
+## Icones
+Foram criados usando recursos do Flaticon.com

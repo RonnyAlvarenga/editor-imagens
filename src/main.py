@@ -1,6 +1,6 @@
 import sys
 import tkinter as tk
-from tkinter import Label, PhotoImage, Scale, filedialog, font, messagebox
+from tkinter import RIDGE, Label, PhotoImage, Scale, filedialog, font, messagebox
 
 import numpy as np
 from PIL import Image, ImageFilter, ImageTk
@@ -46,7 +46,7 @@ def open_image():
         label.image = current_image
 
 # Função para girar a imagem
-def rotate_image():
+def rotate_image(clockwise=True):
     global current_image, edited_image, rotation_angle
     if current_image:
         max_width, max_height = 600, 300
@@ -63,9 +63,15 @@ def rotate_image():
             new_height = int(img_height * scale)
             img_array = np.array(edited_image.resize((new_width, new_height)))
 
-        rotation_angle += 90
-        if rotation_angle > 360:
+        if clockwise:
+            rotation_angle += 90
+        else:
+            rotation_angle -= 90
+
+        if rotation_angle >= 360:
             rotation_angle = 0
+        elif rotation_angle < 0:
+            rotation_angle = 270
 
         if rotation_angle == 90:
             edited_image = edited_image.transpose(Image.ROTATE_90)
@@ -100,20 +106,20 @@ def save_image():
                     "Erro", f"Erro ao salvar a imagem: {str(e)}")
 
 # Função para efeito de desfocar imagem
-def apply_blur_effect(blur_radius):
+def apply_filter(filter_func):
     global current_image, edited_image
     if current_image:
         blurred_image = edited_image.filter(
-            ImageFilter.GaussianBlur(radius=blur_radius))
+            ImageFilter.GaussianBlur(radius=filter_func))
         edited_image.paste(blurred_image)
         current_image = ImageTk.PhotoImage(edited_image)
         label.config(image=current_image)
         label.image = current_image
 
 
-def blur_effect():
-    blur_radius = 2
-    apply_blur_effect(blur_radius)
+def apply_blur_effect():
+    filter_func = 2
+    apply_filter(filter_func)
 
 
 def apply_gaussian_effect():
@@ -253,7 +259,7 @@ def toggle_gaussian_controls():
             gaussian_controls_visible = False
         else:
             gaussian_radius_slider.pack(side="left", padx=5, pady=5)
-            apply_gaussian_button.pack(side="left", padx=5, pady=5)
+            apply_gaussian_button.pack(side="left", fill="both", padx=5, pady=5)
             gaussian_controls_visible = True
 
 # Função para cancelar as alterações
@@ -295,14 +301,14 @@ color_font_menu = "#99b9d9"
 gaussian_color_frame ="#1a3242"
 
 # Fontes de texto
-font_menu_title = font.Font(family="Comic Sans MS", size=16)
-font_menu = font.Font(family="Comic Sans MS", size=8)
+font_menu_title = font.Font(family="Comic Sans MS", size=16, underline=1, weight="bold")
+font_menu = font.Font(family="Verdana", size=7)
 
 main_window.title("Editor de Imagens")
 logo = PhotoImage(file='src/images/image-editing.png')
 main_window.iconphoto(True, logo)
 main_window.configure(bg=main_window_color)
-main_window.geometry("800x650")
+main_window.geometry("950x850")
 
 # opções
 options_frame = tk.Frame(main_window, bg=color_menu)
@@ -313,28 +319,95 @@ menu_frame = tk.Frame(main_window, bg=color_menu)
 menu_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=False)
 
 menu_title = Label(menu_frame, text="Menu", font=font_menu_title, bg=color_menu, fg=color_font_menu)
-menu_title.grid(row=0, column=1, padx=10, pady=10)
+menu_title.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 
-menu_buttons = [
-    ("Carregar\nImagem", open_image),
-    ("Remover\nImagem", remove_image),
-    ("Girar\nImagem", rotate_image),
-    ("Desfocar\nImagem", blur_effect),
-    ("Aplicar\nGaussiano", toggle_gaussian_controls),
-    ("Tamanho\nImagem", resize_image),
-    ("Imagem\nP&B", image_color_to_pb),
-    ("Cancelar\nAlterações", cancel_effect),
-    ("Salvar\nImagem", save_image),
-    ("Sair", close)
-]
 
-for i, (text, command) in enumerate(menu_buttons, start=1):
-    if text == "Sair":
-        button = tk.Button(menu_frame, text=text, command=command, font=font_menu, fg=color_font_menu, width=7, bg=color_menu)
-    else:
-        button = tk.Button(menu_frame, text=text, command=command, font=font_menu, fg=color_font_menu, width=7, bg=color_menu)
+# Icones menu
+open_image_icon = Image.open("src/images/adicionar-img.png")
+remove_image_icon = Image.open("src/images/remover-img.png")
+rotate_image_icon = Image.open("src/images/girar-img.png")
+blur_image_icon = Image.open("src/images/desfocar-img.png")
+gaussian_image_icon = Image.open("src/images/edicao-img.png")
+resize_image_icon = Image.open("src/images/redimensionar-img.png")
+image_color_to_pb_icon = Image.open("src/images/preto-branco-img.png")
+cancel_image_icon = Image.open("src/images/desfazer-img.png")
+save_image_icon = Image.open("src/images/salvar-img.png")
+close_icon = Image.open("src/images/sair-img.png")
 
-    button.grid(row=i, column=1, padx=10 if text == "Sair" else 5, pady=50 if text == "Sair" else 5)
+# Tamanho dos icones menu
+open_image_icon = open_image_icon.resize((35, 35))
+remove_image_icon = remove_image_icon.resize((35, 35))
+rotate_image_icon = rotate_image_icon.resize((35, 35))
+blur_image_icon = blur_image_icon.resize((35, 35))
+gaussian_image_icon = gaussian_image_icon.resize((35, 35))
+resize_image_icon = resize_image_icon.resize((35, 35))
+image_color_to_pb_icon = image_color_to_pb_icon.resize((45, 45))
+cancel_image_icon = cancel_image_icon.resize((35, 35))
+save_image_icon = save_image_icon.resize((35, 35))
+close_icon = close_icon.resize((35, 35))
+
+open_image_icon_photo = ImageTk.PhotoImage(open_image_icon)
+remove_image_icon_photo = ImageTk.PhotoImage(remove_image_icon)
+rotate_image_icon_photo = ImageTk.PhotoImage(rotate_image_icon)
+blur_image_icon_photo = ImageTk.PhotoImage(blur_image_icon)
+gaussian_image_icon_photo = ImageTk.PhotoImage(gaussian_image_icon)
+resize_image_icon_photo = ImageTk.PhotoImage(resize_image_icon)
+image_color_to_pb_icon_photo = ImageTk.PhotoImage(image_color_to_pb_icon)
+cancel_image_icon_photo = ImageTk.PhotoImage(cancel_image_icon)
+save_image_icon_photo = ImageTk.PhotoImage(save_image_icon)
+close_icon_photo = ImageTk.PhotoImage(close_icon)
+
+# Crie o botão e atribua a imagem como o ícone
+menu_title = tk.Button(menu_frame, text="Carregar\nImagem", image=open_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=open_image,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=1, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Remover\nImagem", image=remove_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=remove_image,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=2, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Girar\nImagem", image=rotate_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=rotate_image,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=3, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Desfocar\nImagem", image=blur_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=apply_blur_effect,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=4, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Ajuste Desfoque\nImagem", image=gaussian_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=toggle_gaussian_controls,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=5, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Redimensionar\nImagem", image=resize_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=resize_image,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=6, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Converter para\npreto e branco", image=image_color_to_pb_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=image_color_to_pb,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=7, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Cancelar\nAlterações", image=cancel_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=cancel_effect,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=8, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Salvar\nImagem", image=save_image_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=save_image,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=9, column=0, columnspan=2, pady=5)
+
+menu_title = tk.Button(menu_frame, text="Fechar\nEditor", image=close_icon_photo, compound="top", 
+                      font=font_menu, bg=color_menu, fg=color_font_menu, command=close,
+                      relief="flat", highlightthickness=0)
+menu_title.grid(row=10, column=0, columnspan=2, pady=30)
+
 
 # Crie um Frame para conter a imagem
 image_frame = tk.Frame(main_window)
@@ -363,13 +436,14 @@ image_resize_frame.pack(side="bottom", fill=tk.BOTH, expand=False)
 gaussian_frame = tk.Frame(main_window, bg=main_window_color)
 gaussian_frame.pack(side="bottom", fill=tk.BOTH, expand=False)
 
-# Crie um Frame para ajustar o efeito gaussiano
 gaussian_radius_slider = Scale(
-    gaussian_frame, from_=0, to=10, orient="horizontal", length=200, label="Ajuste Gaussiano", bg=gaussian_color_frame, fg=color_font_menu)
+    gaussian_frame, from_=0, to=10, orient="horizontal", highlightthickness=0, length=200, label="Deslize para ajustar o desfoque", font=font_menu, bg=main_window_color, fg=color_font_menu)
+gaussian_radius_slider.pack(side="left")
 gaussian_radius_slider.pack_forget()
 
 apply_gaussian_button = tk.Button(
-    gaussian_frame, text="Aplicar", command=apply_gaussian_effect, font=font_menu, bg=gaussian_color_frame, fg=color_font_menu)
-apply_gaussian_button.pack_forget()
+    gaussian_frame, text="Aplicar", command=apply_gaussian_effect, highlightthickness=0, font=font_menu, bg=main_window_color, fg=color_font_menu)
+# apply_gaussian_button.pack(side="left", fill="both", expand=True)
+apply_gaussian_button.pack_forget() 
 
 main_window.mainloop()
