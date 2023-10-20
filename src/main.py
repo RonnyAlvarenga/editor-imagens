@@ -164,13 +164,13 @@ def resize_image():
         label.image = current_image
 
         width_label = tk.Label(
-            image_resize_frame, text="Largura:", bg=main_window_color)
+            image_resize_frame, text="Largura:", bg=main_window_color, fg=color_font_menu)
         width_label.pack(side="left", expand=False)
         width_entry = tk.Entry(image_resize_frame, width=10)
         width_entry.pack(side="left", expand=False)
 
         height_label = tk.Label(
-            image_resize_frame, text="Altura:", bg=main_window_color)
+            image_resize_frame, text="Altura:", bg=main_window_color, fg=color_font_menu)
         height_label.pack(side="left", expand=False)
         height_entry = tk.Entry(image_resize_frame, width=10)
         height_entry.pack(side="left", expand=False)
@@ -191,7 +191,7 @@ def resize_image():
 
         # Botão para aplicar o redimensionamento
         apply_button = tk.Button(
-            image_resize_frame, text="Aplicar", command=apply_resize, bg=main_window_color)
+            image_resize_frame, text="Aplicar", command=apply_resize, bg=main_window_color, fg=color_font_menu)
         apply_button.pack(side="left", fill=tk.NONE)
 
         # Função para cancelar o redimensionamento
@@ -206,7 +206,7 @@ def resize_image():
 
         # Botão para cancelar o redimensionamento
         cancel_button = tk.Button(
-            image_resize_frame, text="Cancelar", command=cancel_resize, bg=main_window_color)
+            image_resize_frame, text="Cancelar", command=cancel_resize, bg=main_window_color, fg=color_font_menu)
         cancel_button.pack(side="left", fill=tk.NONE)
 
 
@@ -226,7 +226,7 @@ def image_color_to_pb():
 
 # Função para atualizar a rotação da imagem
 def update_rotation_label():
-    rotation_label.config(text=f"Ângulo de Rotação: {rotation_angle}°")
+    rotation_label.config(text=f"Ângulo de Rotação: {rotation_angle}°",fg=color_font_menu )
 
 
 # Função para remover a imagem
@@ -289,8 +289,10 @@ def close():
 main_window = tk.Tk()
 
 # Cores
-main_window_color = "#5f7074"
-color_menu = "#cadade"
+main_window_color = "#021425"
+color_menu = "#1a3242"
+color_font_menu = "#99b9d9"
+gaussian_color_frame ="#1a3242"
 
 # Fontes de texto
 font_menu_title = font.Font(family="Comic Sans MS", size=16)
@@ -310,7 +312,7 @@ options_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=False)
 menu_frame = tk.Frame(main_window, bg=color_menu)
 menu_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=False)
 
-menu_title = Label(menu_frame, text="Menu", font=font_menu_title)
+menu_title = Label(menu_frame, text="Menu", font=font_menu_title, bg=color_menu, fg=color_font_menu)
 menu_title.grid(row=0, column=1, padx=10, pady=10)
 
 menu_buttons = [
@@ -327,13 +329,12 @@ menu_buttons = [
 ]
 
 for i, (text, command) in enumerate(menu_buttons, start=1):
-    button = tk.Button(menu_frame, text=text,
-                       command=command, font=font_menu, width=7)
-
     if text == "Sair":
-        button.grid(row=i, column=1, padx=10, pady=50)
+        button = tk.Button(menu_frame, text=text, command=command, font=font_menu, fg=color_font_menu, width=7, bg=color_menu)
     else:
-        button.grid(row=i, column=1, padx=5, pady=5)
+        button = tk.Button(menu_frame, text=text, command=command, font=font_menu, fg=color_font_menu, width=7, bg=color_menu)
+
+    button.grid(row=i, column=1, padx=10 if text == "Sair" else 5, pady=50 if text == "Sair" else 5)
 
 # Crie um Frame para conter a imagem
 image_frame = tk.Frame(main_window)
@@ -364,11 +365,11 @@ gaussian_frame.pack(side="bottom", fill=tk.BOTH, expand=False)
 
 # Crie um Frame para ajustar o efeito gaussiano
 gaussian_radius_slider = Scale(
-    gaussian_frame, from_=0, to=10, orient="horizontal", length=200, label="Ajuste Gaussiano", bg=main_window_color)
+    gaussian_frame, from_=0, to=10, orient="horizontal", length=200, label="Ajuste Gaussiano", bg=gaussian_color_frame, fg=color_font_menu)
 gaussian_radius_slider.pack_forget()
 
 apply_gaussian_button = tk.Button(
-    gaussian_frame, text="Aplicar", command=apply_gaussian_effect, font=font_menu, bg=main_window_color)
+    gaussian_frame, text="Aplicar", command=apply_gaussian_effect, font=font_menu, bg=gaussian_color_frame, fg=color_font_menu)
 apply_gaussian_button.pack_forget()
 
 main_window.mainloop()
