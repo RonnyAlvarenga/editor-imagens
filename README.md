@@ -47,9 +47,6 @@ Para executar o editor de imagens, você pode simplesmente rodar o código Pytho
 ### Sair
 - Encerra o aplicativo.
 
-## Contribuição
-Sinta-se à vontade para contribuir com melhorias ou correções neste projeto. Basta abrir uma solicitação de pull.
-
 ## Licença
 Este projeto está licenciado sob a Licença MIT. Consulte o arquivo LICENSE para obter detalhes.
 
