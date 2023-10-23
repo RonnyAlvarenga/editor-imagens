@@ -14,11 +14,17 @@ resized_image = None
 max_width, max_height = 600, 300
 gaussian_controls_visible = False
 
+current_image = None
+original_image = None
+edited_image = None
+rotation_angle = 0
+
 # Funções
 
 # Função para abrir uma imagem
-
 def open_image():
+    hide_gaussian_controls()
+    hide_resize_image()
     global current_image, original_image, edited_image
     file_path = filedialog.askopenfilename(
         filetypes=[("Todas as Imagens", "*.jpg *.png *.jpeg *.bmp")])
@@ -57,9 +63,10 @@ def remove_image():
     edited_image = None
 
 # Função para girar a imagem
-
-
-def rotate_image(clockwise=True):
+def rotate_image(clockwise=True, pivot_point=None):
+    hide_gaussian_controls()
+    hide_resize_image()
+    hide_rotation_label()
     global current_image, edited_image, rotation_angle
     if current_image:
         max_width, max_height = 600, 300
@@ -85,30 +92,32 @@ def rotate_image(clockwise=True):
             rotation_angle = 0
         elif rotation_angle < 0:
             rotation_angle = 270
+            
+        if pivot_point is None:
+            pivot_point = (img_width // 2, img_height // 2) 
 
-        if rotation_angle == 90:
-            edited_image = edited_image.transpose(Image.ROTATE_90)
-        elif rotation_angle == 180:
-            edited_image = edited_image.rotate(rotation_angle, expand=True)
-        elif rotation_angle == 270:
-            edited_image = edited_image.transpose(Image.ROTATE_270)
-        else:
-            edited_image = edited_image.transpose(Image.FLIP_TOP_BOTTOM)
+        matrix = edited_image.transform(edited_image.size, Image.AFFINE, (1, 0, -pivot_point[0], 0, 1, -pivot_point[1]))
+
+        edited_image = edited_image.rotate(rotation_angle, resample=Image.NEAREST, expand=True, center=pivot_point)
 
         current_image = ImageTk.PhotoImage(edited_image)
         label.config(image=current_image)
         label.image = current_image
         update_rotation_label()
 
-
 # Função para atualizar a rotação da imagem
 def update_rotation_label():
     rotation_label.config(
         text=f"Ângulo de Rotação: {rotation_angle}°", fg=color_font_menu)
-
-
+    
+def hide_rotation_label():
+    rotation_label.config(text="", fg=color_font_menu)    
+    
 # Função para efeito de desfocar imagem
 def apply_blur(blur_func):
+    hide_gaussian_controls()
+    hide_resize_image()
+    hide_rotation_label()
     global current_image, edited_image
     if current_image:
         blurred_image = edited_image.filter(
@@ -124,7 +133,7 @@ def apply_blur_effect():
     apply_blur(filter_func)
 
 
-def apply_gaussian_effect():
+def apply_gaussian_effect():    
     global current_image, edited_image, original_image
     if current_image:
         try:
@@ -141,22 +150,33 @@ def apply_gaussian_effect():
 
 
 def toggle_gaussian_controls():
+    hide_resize_image()
+    hide_rotation_label()
     global current_image, gaussian_controls_visible
 
     if current_image:
         if gaussian_controls_visible:
             gaussian_radius_slider.pack_forget()
             apply_gaussian_button.pack_forget()
-            # cancel_gaussian_button.pack_forget()
             gaussian_controls_visible = False
         else:
             gaussian_radius_slider.pack(side="left", padx=5, pady=5)
-            apply_gaussian_button.pack(side="left", padx=5, pady=5)
-            # cancel_gaussian_button.pack(side="left", padx=5, pady=5)
-            gaussian_controls_visible = True
-
+            apply_gaussian_button.pack(
+                side="left", fill="both", padx=5, pady=5)
+            gaussian_controls_visible = True   
+            
+def hide_gaussian_controls():
+    global gaussian_controls_visible
+    if gaussian_controls_visible:
+        gaussian_radius_slider.pack_forget()
+        apply_gaussian_button.pack_forget()
+        gaussian_controls_visible = False     
+        
+                       
 # Função para redimensionar a imagem
 def resize_image():
+    hide_gaussian_controls()
+    hide_rotation_label()
     global current_image, edited_image, resized_image
     if current_image:
         for widget in image_resize_frame.winfo_children():
@@ -200,25 +220,18 @@ def resize_image():
         apply_button = tk.Button(
             image_resize_frame, text="Aplicar", command=apply_resize, bg=main_window_color, fg=color_font_menu)
         apply_button.pack(side="left", fill=tk.NONE)
-
-        # Função para cancelar o redimensionamento
-        def cancel_resize():
-            label.config(image=current_image)
-            label.image = current_image
-            width_entry.delete(0, tk.END)
-            height_entry.delete(0, tk.END)
-
-            for widget in image_resize_frame.winfo_children():
-                widget.destroy()
-
-        # Botão para cancelar o redimensionamento
-        cancel_button = tk.Button(
-            image_resize_frame, text="Cancelar", command=cancel_resize, bg=main_window_color, fg=color_font_menu)
-        cancel_button.pack(side="left", fill=tk.NONE)
-
+        
+        
+def hide_resize_image():
+    for resize in image_resize_frame.winfo_children():
+        resize.pack_forget()           
+        
 
 # Função para converter a imagem para preto e branco
 def image_color_to_pb():
+    hide_gaussian_controls()
+    hide_resize_image()
+    hide_rotation_label()
     global current_image, edited_image
     if current_image:
         try:
@@ -229,21 +242,7 @@ def image_color_to_pb():
         except ValueError:
             messagebox.showerror(
                 "Erro", "Ocorreu um erro ao converter a imagem para preto e branco.")
-
-
-def toggle_gaussian_controls():
-    global current_image, gaussian_controls_visible
-
-    if current_image:
-        if gaussian_controls_visible:
-            gaussian_radius_slider.pack_forget()
-            apply_gaussian_button.pack_forget()
-            gaussian_controls_visible = False
-        else:
-            gaussian_radius_slider.pack(side="left", padx=5, pady=5)
-            apply_gaussian_button.pack(
-                side="left", fill="both", padx=5, pady=5)
-            gaussian_controls_visible = True
+            
 
 # Função para cancelar as alterações
 def cancel_effect():
@@ -269,6 +268,9 @@ def cancel_effect():
 
 # Função para salvar a imagem
 def save_image():
+    hide_gaussian_controls()
+    hide_resize_image()
+    hide_rotation_label()
     global current_image, edited_image
     if edited_image:
         file_path = filedialog.asksaveasfilename(
@@ -425,12 +427,6 @@ label.pack(fill=tk.BOTH, expand=True)
 rotation_label = tk.Label(image_frame, text="",
                           font=font_menu, bg=main_window_color)
 rotation_label.pack(side="bottom", fill=tk.BOTH, expand=False)
-
-# Variável global para armazenar a imagem atual
-current_image = None
-original_image = None
-edited_image = None
-rotation_angle = 0
 
 # Crie um Frame para ajustar a imagem
 image_resize_frame = tk.Frame(main_window, bg=main_window_color)
