@@ -351,7 +351,7 @@ cancel_image_icon = cancel_image_icon.resize((35, 35))
 save_image_icon = save_image_icon.resize((35, 35))
 close_icon = close_icon.resize((35, 35))
 
-# carrega o icone na tela
+# Carrega o icone
 open_image_icon_photo = ImageTk.PhotoImage(open_image_icon)
 remove_image_icon_photo = ImageTk.PhotoImage(remove_image_icon)
 rotate_image_icon_photo = ImageTk.PhotoImage(rotate_image_icon)
@@ -415,24 +415,24 @@ menu_title = tk.Button(menu_frame, text="Fechar\nEditor", image=close_icon_photo
 menu_title.grid(row=10, column=0, columnspan=2, pady=30)
 
 
-# Crie um Frame para conter a imagem
+# Frame para conter a imagem
 image_frame = tk.Frame(main_window)
 image_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-# Crie uma label para exibir a imagem carregada
+# Label para exibir a imagem carregada
 label = tk.Label(image_frame, bg=main_window_color)
 label.pack(fill=tk.BOTH, expand=True)
 
-# Crie um rótulo para exibir o ângulo de rotação
+# Rótulo para exibir o ângulo de rotação
 rotation_label = tk.Label(image_frame, text="",
                           font=font_menu, bg=main_window_color)
 rotation_label.pack(side="bottom", fill=tk.BOTH, expand=False)
 
-# Crie um Frame para ajustar a imagem
+# Frame para ajustar a imagem
 image_resize_frame = tk.Frame(main_window, bg=main_window_color)
 image_resize_frame.pack(side="bottom", fill=tk.BOTH, expand=False)
 
-# Crie um Frame para ajustar o efeito gaussiano
+# Frame para ajustar o efeito gaussiano
 gaussian_frame = tk.Frame(main_window, bg=main_window_color)
 gaussian_frame.pack(side="bottom", fill=tk.BOTH, expand=False)
 

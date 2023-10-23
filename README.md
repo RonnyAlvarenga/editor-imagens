@@ -4,15 +4,11 @@ Este é um pequeno editor de imagens em Python com uma interface gráfica usando
 
 ## Requisitos
 
-Certifique-se de ter o Python e as seguintes bibliotecas instaladas:
+Ter o Python e as seguintes bibliotecas instaladas:
 
 - tkinter
 - numpy
 - Pillow (PIL)
-
-## Executando o Editor de Imagens
-
-Para executar o editor de imagens, você pode simplesmente rodar o código Python fornecido. Certifique-se de ter todas as dependências instaladas.
 
 ## Funcionalidades
 
